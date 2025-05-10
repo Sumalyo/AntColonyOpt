@@ -5,6 +5,7 @@ let bestTourDist = Infinity;
 let points = [];
 let distanceCache = [];
 let pheromoneTrailsGlobal = [];
+let pheromoneTrailsGlobalCopy = [];
 
 class ant
 {
@@ -227,9 +228,9 @@ function drawPathIter(arr,x,c="black")
 }
 
 
-let glen = 40;
+let glen = 20;
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(730, 600);
   for(let i = 0;i<glen;i+=1)
   {
     points.push(createVector(random(0,width),random(0,height)));
@@ -288,9 +289,10 @@ function oneShotRecursiveSolve()
     }  
 }
 
-let numAnts = 5;
+let numAnts = 10;
 function antGen()
 {
+  //pheromoneTrailGlobalCopy = pheromoneTrailsGlobal.splice();
   let ants = [];
   for (let i =0; i<numAnts;i++)
   {
@@ -318,28 +320,76 @@ function antGen()
       }
     }
   }
+  pheromoneTrailsGlobalCopy = pheromoneTrailsGlobal.slice();
   //console.log(pheromoneTrailsGlobal);
 }
+function drawPheromoneTrails(haltClipping=0)
+{
+  //console.log("called");
+  // TODO Implement Evaporation support
+      for (let i  = 0; i < indices.length ; i++)
+    {
+      for (let j  = 0; j < indices.length ; j++)
+      {
+        let impact = pheromoneTrailsGlobalCopy[i][j];
+        if (pheromoneTrailsGlobalCopy[i][j]-10>=0 && haltClipping == 0)
+        {
+          pheromoneTrailsGlobalCopy[i][j]-=2;
+        }
+        //console.log(impact)
+        let mappedValue = map(impact, 0, 20, 0, 100, true); // FIXME Max value is arbitary
+        push();
+        stroke(0,0,0,mappedValue);
+        line(points[i].x,points[i].y,points[j].x,points[j].y);
+        pop();
+      }
+    }
+}
 
+
+let haltClipping = 0;
 function DrawAntsSolve(iterations)
 {
   if (done==0)
   {
-    for(let i = 0; i<iterations;i++)
+    // for(let i = 0; i<iterations;i++)
+    // {
+    // antGen();
+    // }
+    // Iterative solving done right
+    if (generationsGlobal>0)
     {
-    antGen();
+      antGen();
+      generationsGlobal--;
+      //console.log("called")
+      //drawPheromoneTrails();
     }
     //Solve(); // one shot solution which is quite computationally intensive
     //console.log(bestTourDist);// why don't we use an iterative approach
-    done=0.5;
+    if (generationsGlobal==0)
+      {
+        done=0.5;
+        haltClipping=1;
+      }
     //console.log("solved")
   }
+
   if(done==0 || done == 0.5)
+    {
     background(220);
+    }
     
     drawPoints(indices);
+    
+    if (done==0.5)
+    {drawPheromoneTrails(haltClipping);}
     drawPathIter(tourHistory[hist],iT,c);
     blockingSleep(1,millis());
+    
+    // We want to visualize global pheromone trails
+    //console.log(hist);
+
+
   
     if(iT<tourHistory[hist].length)
     {
@@ -363,11 +413,11 @@ function DrawAntsSolve(iterations)
 
 
 
-let generations = 10;
+let generationsGlobal = 10;
 function draw() {
   //oneShotRecursiveSolve();
   
-  DrawAntsSolve(generations);
+  DrawAntsSolve(generationsGlobal);
   //console.log(pheromoneTrails);
 
 
