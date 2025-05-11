@@ -91,6 +91,35 @@ class ant
     }
     return 0;
   }
+  scorePath()
+  {
+    let d = 0;
+    let scalingfactor = 1;
+    let penalty = 0.8;
+    for (let i = 0; i<this.tourHistory.length-1 ;i++)
+    {
+      d+=distanceCache[this.tourHistory[i]][this.tourHistory[i+1]];
+    }
+    //console.log(d)
+    if (d<=bestTourDist)
+    {
+      bestTourDist=d;
+      scalingfactor = 1.2;
+    }
+    else
+    {
+      scalingfactor = (bestTourDist/d)*penalty;
+    }
+      for (let i  = 0; i < indices.length ; i++)
+    {
+      for (let j  = 0; j < indices.length ; j++)
+      {
+        this.phermoneMap[i][j]=scalingfactor*this.phermoneMap[i][j];
+      }
+    }
+    //console.log(scalingfactor);
+
+  }
 
 
 }
@@ -229,7 +258,7 @@ function drawPathIter(arr,x,c="black")
 }
 
 
-let glen = 20;
+let glen = 30;
 function setup() {
   createCanvas(730, 600);
   for(let i = 0;i<glen;i+=1)
@@ -290,7 +319,7 @@ function oneShotRecursiveSolve()
     }  
 }
 
-let numAnts = 10;
+let numAnts = 6;
 function antGen()
 {
   //pheromoneTrailGlobalCopy = pheromoneTrailsGlobal.splice();
@@ -305,6 +334,7 @@ function antGen()
   {
     val = ants[i].moveNew();
   }
+  ants[i].scorePath();
   //console.log(ants[i].tourHistory);
   tourHistory.push(ants[i].tourHistory);
   }
@@ -340,18 +370,15 @@ function drawPheromoneTrails(NothaltClipping)
     }
     //console.log(NothaltClipping);
     console.log(pheromax);
-
-
-
       for (let i  = 0; i < indices.length ; i++)
     {
       for (let j  = 0; j < indices.length ; j++)
       {
         let impact = pheromoneTrailsGlobalCopy[i][j];
         //if (impact > pheromax){pheromax=impact;}
-        if (pheromoneTrailsGlobalCopy[i][j]-1>=0 && NothaltClipping > 0)
+        if (pheromoneTrailsGlobalCopy[i][j]-5>=0 && NothaltClipping > 0)
         {
-          pheromoneTrailsGlobalCopy[i][j]-=0.5;
+          pheromoneTrailsGlobalCopy[i][j]-=10;
         }
         //console.log(impact)
         let mappedValue = map(impact, 0, pheromax, 0, 100, true); 
@@ -365,7 +392,7 @@ function drawPheromoneTrails(NothaltClipping)
 }
 
 
-let haltClipping = 50;
+let haltClipping = 100; // MAX GENERATION X 2 or MAX ANTS
 function DrawAntsSolve(iterations)
 {
   if (done==0)
@@ -428,12 +455,14 @@ function DrawAntsSolve(iterations)
         done=1;
       }
   
-    }  
+    } 
+  //console.log(iT);
+  //console.log(hist); 
 }
 
 
 
-let generationsGlobal = 20;
+let generationsGlobal = 8;
 function draw() {
   //oneShotRecursiveSolve();
   
