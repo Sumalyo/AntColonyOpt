@@ -319,7 +319,7 @@ function oneShotRecursiveSolve()
     }  
 }
 
-let numAnts = 6;
+let numAnts = 2;
 function antGen()
 {
   //pheromoneTrailGlobalCopy = pheromoneTrailsGlobal.splice();
@@ -369,7 +369,7 @@ function drawPheromoneTrails(NothaltClipping)
       }
     }
     //console.log(NothaltClipping);
-    console.log(pheromax);
+    //console.log(pheromax);
       for (let i  = 0; i < indices.length ; i++)
     {
       for (let j  = 0; j < indices.length ; j++)
@@ -378,10 +378,10 @@ function drawPheromoneTrails(NothaltClipping)
         //if (impact > pheromax){pheromax=impact;}
         if (pheromoneTrailsGlobalCopy[i][j]-5>=0 && NothaltClipping > 0)
         {
-          pheromoneTrailsGlobalCopy[i][j]-=10;
+          pheromoneTrailsGlobalCopy[i][j]-=5;
         }
         //console.log(impact)
-        let mappedValue = map(impact, 0, pheromax, 0, 100, true); 
+        let mappedValue = map(impact, 0, pheromax, 0, 20, true); 
         push();
         stroke(0,0,0,mappedValue);
         line(points[i].x,points[i].y,points[j].x,points[j].y);
@@ -392,7 +392,7 @@ function drawPheromoneTrails(NothaltClipping)
 }
 
 
-let haltClipping = 100; // MAX GENERATION X 2 or MAX ANTS
+let haltClipping = 60; // MAX GENERATION X 2 or MAX ANTS
 function DrawAntsSolve(iterations)
 {
   if (done==0)
@@ -428,10 +428,18 @@ function DrawAntsSolve(iterations)
     drawPoints(indices);
     
     if (done==0.5)
-    {drawPheromoneTrails(haltClipping);}
+    {
+      drawPheromoneTrails(haltClipping);
+      drawPathIter(tourHistory[hist],iT,c);
+      blockingSleep(1,millis());
+    }
     haltClipping--;
-    drawPathIter(tourHistory[hist],iT,c);
-    blockingSleep(1,millis());
+    if(done==1)
+    {
+      drawPathIter(tourHistory[hist],iT,c);
+      blockingSleep(1,millis());
+    }
+
     
     // We want to visualize global pheromone trails
     //console.log(hist);
@@ -467,6 +475,7 @@ function draw() {
   //oneShotRecursiveSolve();
   
   DrawAntsSolve(generationsGlobal);
+  console.log(bestTourDist);
   //console.log(pheromax);
   //console.log(pheromoneTrails);
 
