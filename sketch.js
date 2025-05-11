@@ -6,6 +6,7 @@ let points = [];
 let distanceCache = [];
 let pheromoneTrailsGlobal = [];
 let pheromoneTrailsGlobalCopy = [];
+//let pheromax = 0;
 
 class ant
 {
@@ -323,31 +324,48 @@ function antGen()
   pheromoneTrailsGlobalCopy = pheromoneTrailsGlobal.slice();
   //console.log(pheromoneTrailsGlobal);
 }
-function drawPheromoneTrails(haltClipping=0)
+function drawPheromoneTrails(NothaltClipping)
 {
-  //console.log("called");
-  // TODO Implement Evaporation support
+
+  let pheromax=0;
+  for (let i  = 0; i < indices.length ; i++)
+    {
+      for (let j  = 0; j < indices.length ; j++)
+      {
+        if (pheromoneTrailsGlobalCopy[i][j] > pheromax)
+        {
+          pheromax = pheromoneTrailsGlobalCopy[i][j];;
+        }
+      }
+    }
+    //console.log(NothaltClipping);
+    console.log(pheromax);
+
+
+
       for (let i  = 0; i < indices.length ; i++)
     {
       for (let j  = 0; j < indices.length ; j++)
       {
         let impact = pheromoneTrailsGlobalCopy[i][j];
-        if (pheromoneTrailsGlobalCopy[i][j]-10>=0 && haltClipping == 0)
+        //if (impact > pheromax){pheromax=impact;}
+        if (pheromoneTrailsGlobalCopy[i][j]-1>=0 && NothaltClipping > 0)
         {
-          pheromoneTrailsGlobalCopy[i][j]-=2;
+          pheromoneTrailsGlobalCopy[i][j]-=0.5;
         }
         //console.log(impact)
-        let mappedValue = map(impact, 0, 20, 0, 100, true); // FIXME Max value is arbitary
+        let mappedValue = map(impact, 0, pheromax, 0, 100, true); 
         push();
         stroke(0,0,0,mappedValue);
         line(points[i].x,points[i].y,points[j].x,points[j].y);
         pop();
       }
     }
+    //pheromax=0;
 }
 
 
-let haltClipping = 0;
+let haltClipping = 50;
 function DrawAntsSolve(iterations)
 {
   if (done==0)
@@ -361,6 +379,7 @@ function DrawAntsSolve(iterations)
     {
       antGen();
       generationsGlobal--;
+      
       //console.log("called")
       //drawPheromoneTrails();
     }
@@ -369,7 +388,7 @@ function DrawAntsSolve(iterations)
     if (generationsGlobal==0)
       {
         done=0.5;
-        haltClipping=1;
+        //haltClipping-=1;
       }
     //console.log("solved")
   }
@@ -383,6 +402,7 @@ function DrawAntsSolve(iterations)
     
     if (done==0.5)
     {drawPheromoneTrails(haltClipping);}
+    haltClipping--;
     drawPathIter(tourHistory[hist],iT,c);
     blockingSleep(1,millis());
     
@@ -413,11 +433,12 @@ function DrawAntsSolve(iterations)
 
 
 
-let generationsGlobal = 10;
+let generationsGlobal = 20;
 function draw() {
   //oneShotRecursiveSolve();
   
   DrawAntsSolve(generationsGlobal);
+  //console.log(pheromax);
   //console.log(pheromoneTrails);
 
 
